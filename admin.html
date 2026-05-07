@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>機材管理 管理画面 | ECPGROUP</title>
+<style>
+:root {
+  --bg:#0d0f12;--bg2:#161a1f;--bg3:#1e2329;--bg4:#252b35;
+  --border:#2a3040;--border2:#3a4455;
+  --text:#e8ecf0;--text2:#8899aa;--text3:#4a5568;
+  --accent:#3b82f6;--accent2:#1d4ed8;
+  --green:#22c55e;--green-bg:#052e16;--green-dim:rgba(34,197,94,.12);
+  --amber:#f59e0b;--amber-bg:#2d1b00;--amber-dim:rgba(245,158,11,.12);
+  --red:#ef4444;--red-bg:#2d0a0a;--red-dim:rgba(239,68,68,.12);
+  --purple:#a78bfa;--purple-bg:#1e1040;--purple-dim:rgba(167,139,250,.12);
+  --radius:12px;--radius-sm:8px;--radius-xs:5px;
+  --font:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5;display:flex;min-height:100vh;}
+
+/* サイドバー */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.sb-logo-sub{font-size:10px;font-weight:600;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
+.sb-logo-title{font-size:14px;font-weight:700;}
+.sb-logo-badge{display:inline-block;margin-top:6px;font-size:10px;padding:2px 8px;border-radius:999px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.nav{padding:12px 10px;flex:1;}
+.nav-sec{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;padding:8px 10px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;}
+.nav-item:hover{background:var(--bg3);color:var(--text);}
+.nav-item.active{background:rgba(59,130,246,.15);color:var(--accent);font-weight:600;}
+.nav-item.active svg{color:var(--accent);}
+.sb-footer{padding:14px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);}
+.sb-footer a{color:var(--accent);text-decoration:none;}
+
+/* メイン */
+.main{flex:1;overflow-y:auto;min-width:0;}
+.page{display:none;padding:28px 32px;min-height:100vh;}
+.page.active{display:block;}
+.page-header{margin-bottom:24px;}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text2);}
+
+/* カード */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--text2);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.card-title svg{width:14px;height:14px;}
+.card-body{padding:18px;}
+
+/* ダッシュボード */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.stat-label{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--text2);text-transform:uppercase;margin-bottom:8px;}
+.stat-value{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px;}
+.stat-sub{font-size:11px;color:var(--text2);}
+.sv-total{color:var(--text);}
+.sv-zaiko{color:var(--green);}
+.sv-shiyochu{color:var(--amber);}
+.sv-shuri{color:var(--purple);}
+.sv-haki{color:var(--text3);}
+
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+/* 使用率 */
+.usage-list{display:flex;flex-direction:column;gap:10px;}
+.usage-item{}
+.usage-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.usage-name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.usage-attr-tag{font-size:10px;padding:1px 6px;border-radius:999px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.usage-pct{font-size:13px;font-weight:700;}
+.usage-bar-bg{height:6px;background:var(--bg3);border-radius:999px;overflow:hidden;}
+.usage-bar-fill{height:100%;border-radius:999px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.u-high .usage-bar-fill{background:var(--amber);}
+.u-mid  .usage-bar-fill{background:var(--accent);}
+.u-low  .usage-bar-fill{background:var(--green);}
+.u-high .usage-pct{color:var(--amber);}
+.u-mid  .usage-pct{color:var(--accent);}
+.u-low  .usage-pct{color:var(--green);}
+
+/* 属性グリッド */
+.attr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+.attr-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;}
+.attr-card-name{font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600;}
+.attr-card-nums{display:flex;align-items:baseline;gap:6px;}
+.attr-card-total{font-size:20px;font-weight:700;}
+.attr-card-detail{font-size:11px;color:var(--text2);}
+.attr-mini-bar{height:4px;background:var(--border);border-radius:999px;margin-top:8px;overflow:hidden;}
+.attr-mini-fill{height:100%;border-radius:999px;background:var(--amber);}
+
+/* ログフィード */
+.log-feed{display:flex;flex-direction:column;}
+.lf-item{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border);}
+.lf-item:last-child{border-bottom:none;}
+.lf-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.lf-main{flex:1;min-width:0;}
+.lf-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lf-sub{font-size:11px;color:var(--text2);}
+.lf-time{font-size:11px;color:var(--text3);white-space:nowrap;}
+
+/* テーブル */
+.tc{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
+.sw{position:relative;flex:1;}
+.sw svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3);pointer-events:none;}
+.si{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px 9px 34px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;}
+.si:focus{border-color:var(--accent);}
+.si::placeholder{color:var(--text3);}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;border:none;transition:all .15s;}
+.btn svg{width:14px;height:14px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent2);}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--border2);color:var(--text);}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.btn-danger:hover{background:rgba(239,68,68,.2);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+
+.tw{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{background:var(--bg3);border-bottom:1px solid var(--border);}
+thead th{padding:9px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--text2);text-transform:uppercase;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--bg3);}
+tbody td{padding:10px 14px;vertical-align:middle;}
+.td-mono{font-family:'Courier New',monospace;font-size:12px;color:var(--accent);font-weight:700;}
+.td-sub{color:var(--text2);font-size:12px;}
+.td-trunc{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.td-c{text-align:center;}
+.empty-row td,.loading-row td{text-align:center;color:var(--text3);padding:48px;font-size:13px;}
+
+/* バッジ */
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+.bz{background:var(--green-bg);color:var(--green);}
+.bs{background:var(--amber-bg);color:var(--amber);}
+.br{background:var(--purple-bg);color:var(--purple);}
+.bk{background:var(--red-bg);color:var(--red);}
+.bh{background:var(--bg3);color:var(--text3);}
+.bm{background:rgba(59,130,246,.15);color:var(--accent);}
+.bhe{background:var(--green-dim);color:var(--green);}
+.bi{background:var(--amber-dim);color:var(--amber);}
+.bsr{background:var(--purple-dim);color:var(--purple);}
+.bdi{background:var(--red-dim);color:var(--red);}
+
+/* 使用率セル */
+.uc{display:flex;align-items:center;gap:8px;}
+.uc-bar{flex:1;height:5px;background:var(--bg3);border-radius:999px;min-width:40px;overflow:hidden;}
+.uc-fill{height:100%;border-radius:999px;}
+.uc-pct{font-size:12px;font-weight:700;width:28px;text-align:right;flex-shrink:0;}
+
+/* スライドパネル */
+.po{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;}
+.po.open{opacity:1;pointer-events:all;}
+.panel{position:absolute;top:0;right:0;bottom:0;width:420px;max-width:95vw;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.po.open .panel{transform:translateX(0);}
+.ph{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.ph-title{font-size:15px;font-weight:600;}
+.ph-id{font-size:11px;color:var(--accent);font-family:'Courier New',monospace;font-weight:700;margin-top:2px;}
+.pc{background:none;border:none;color:var(--text2);cursor:pointer;padding:4px;display:flex;border-radius:var(--radius-xs);}
+.pc:hover{background:var(--bg3);color:var(--text);}
+.pc svg{width:18px;height:18px;}
+.pb{flex:1;overflow-y:auto;padding:20px;}
+.pf{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;}
+.pf .btn{flex:1;justify-content:center;}
+
+/* フォーム */
+.fg{margin-bottom:14px;}
+.fl{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.04em;margin-bottom:5px;}
+.req{font-size:10px;color:var(--red);background:var(--red-bg);padding:1px 5px;border-radius:3px;}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;font-size:14px;color:var(--text);font-family:var(--font);outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none;}
+.fi:focus{border-color:var(--accent);}
+.fi::placeholder{color:var(--text3);}
+select.fi{cursor:pointer;}
+.fi-id{font-size:24px;font-weight:700;color:var(--accent);font-family:'Courier New',monospace;text-align:center;background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.3);letter-spacing:.08em;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fhint{font-size:11px;color:var(--text3);margin-top:3px;}
+.fdiv{height:1px;background:var(--border);margin:16px 0;}
+
+/* ログフィルター */
+.lf-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.fb{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--font);transition:all .15s;}
+.fb.active{background:rgba(59,130,246,.15);border-color:var(--accent);color:var(--accent);font-weight:600;}
+
+/* トースト */
+.toast{position:fixed;top:20px;right:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:999;transform:translateX(calc(100% + 32px));transition:transform .3s cubic-bezier(.4,0,.2,1);max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,.4);}
+.toast.show{transform:translateX(0);}
+.toast.ok{border-color:rgba(34,197,94,.4);}
+.toast.ng{border-color:rgba(239,68,68,.4);}
+.toast svg{width:16px;height:16px;flex-shrink:0;}
+.toast.ok svg{color:var(--green);}
+.toast.ng svg{color:var(--red);}
+
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(3,1fr);}  .dash-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){.sidebar{width:56px;} .nav-item span,.sb-logo-sub,.sb-logo-title,.sb-logo-badge,.sb-footer,.nav-sec{display:none;} .nav-item{justify-content:center;padding:12px;} .page{padding:16px;} .stat-grid{grid-template-columns:repeat(2,1fr);} .dash-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- サイドバー -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-sub">ECPGROUP</div>
+    <div class="sb-logo-title">機材管理</div>
+    <span class="sb-logo-badge">管理者用</span>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">メニュー</div>
+    <button class="nav-item active" data-page="dashboard" onclick="sw('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>ダッシュボード</span>
+    </button>
+    <button class="nav-item" data-page="kizai" onclick="sw('kizai',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <span>機材マスタ</span>
+    </button>
+    <button class="nav-item" data-page="member" onclick="sw('member',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>入力者マスタ</span>
+    </button>
+    <button class="nav-item" data-page="log" onclick="sw('log',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>操作ログ</span>
+    </button>
+  </nav>
+  <div class="sb-footer"><a href="index.html">← 入力フォームへ</a></div>
+</aside>
+
+<main class="main">
+
+  <!-- ダッシュボード -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title">ダッシュボード</div>
+      <div class="page-sub" id="dash-updated">読み込み中...</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">総機材数</div><div class="stat-value sv-total" id="st-total">—</div><div class="stat-sub">廃棄除く</div></div>
+      <div class="stat-card"><div class="stat-label">在庫中</div><div class="stat-value sv-zaiko" id="st-zaiko">—</div><div class="stat-sub">使用可能</div></div>
+      <div class="stat-card"><div class="stat-label">使用中</div><div class="stat-value sv-shiyochu" id="st-shiyochu">—</div><div class="stat-sub">持出中</div></div>
+      <div class="stat-card"><div class="stat-label">修理・故障</div><div class="stat-value sv-shuri" id="st-shuri">—</div><div class="stat-sub">要対応</div></div>
+      <div class="stat-card"><div class="stat-label">廃棄済</div><div class="stat-value sv-haki" id="st-haki">—</div><div class="stat-sub">除外済み</div></div>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>属性別 機材数</div>
+        </div>
+        <div class="card-body"><div class="attr-grid" id="attr-grid"><div style="color:var(--text3);font-size:12px;">読み込み中...</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>最近の操作</div>
+          <button class="btn btn-ghost btn-sm" onclick="sw('log',document.querySelector('[data-page=log]'))">すべて見る</button>
+        </div>
+        <div class="log-feed" id="dash-feed"><div class="lf-item"><span style="color:var(--text3);font-size:12px;">読み込み中...</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>機材別 使用率ランキング</div>
+        <div style="font-size:11px;color:var(--text3);">過去90日間の持出回数ベース</div>
+      </div>
+      <div class="card-body"><div class="usage-list" id="usage-list"><div style="color:var(--text3);font-size:12px;">読み込み中...</div></div></div>
+    </div>
+  </div>
+
+  <!-- 機材マスタ -->
+  <div class="page" id="page-kizai">
+    <div class="page-header"><div class="page-title">機材マスタ</div><div class="page-sub">機材の登録・編集・廃棄処理</div></div>
+    <div class="tc">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="si" id="ks" placeholder="ID・機材名・型番・属性で検索..." oninput="filterK()"></div>
+      <select class="fi" style="width:130px;padding:9px 13px;" id="kf" onchange="filterK()"><option value="">すべての状態</option><option>在庫中</option><option>使用中</option><option>修理中</option><option>故障中</option><option>破棄</option></select>
+      <button class="btn btn-primary" onclick="openKP()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新規登録</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="kizai-count"></div>
+    <div class="tw"><table><thead><tr><th>ID</th><th>機材名</th><th>型番</th><th>属性</th><th>状態</th><th>場所</th><th>使用率(90日)</th><th>備考</th></tr></thead><tbody id="k-tbody"><tr class="loading-row"><td colspan="8">読み込み中...</td></tr></tbody></table></div>
+  </div>
+
+  <!-- 入力者マスタ -->
+  <div class="page" id="page-member">
+    <div class="page-header"><div class="page-title">入力者マスタ</div><div class="page-sub">入力フォームに表示する担当者の登録・管理</div></div>
+    <div class="tc">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="si" id="ms" placeholder="氏名・所属で検索..." oninput="filterM()"></div>
+      <button class="btn btn-primary" onclick="openMP()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>担当者追加</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="member-count"></div>
+    <div class="tw"><table><thead><tr><th>No.</th><th>氏名</th><th>所属</th><th>表示順</th><th>登録日</th><th>操作回数</th></tr></thead><tbody id="m-tbody"><tr class="loading-row"><td colspan="6">読み込み中...</td></tr></tbody></table></div>
+  </div>
+
+  <!-- 操作ログ -->
+  <div class="page" id="page-log">
+    <div class="page-header"><div class="page-title">操作ログ</div><div class="page-sub">全機材の持出・返却・移動履歴</div></div>
+    <div class="lf-btns">
+      <button class="fb active" data-sosa="" onclick="setLF(this)">すべて</button>
+      <button class="fb" data-sosa="持出" onclick="setLF(this)">持出</button>
+      <button class="fb" data-sosa="返却" onclick="setLF(this)">返却</button>
+      <button class="fb" data-sosa="移動" onclick="setLF(this)">移動</button>
+      <button class="fb" data-sosa="修理依頼" onclick="setLF(this)">修理依頼</button>
+      <button class="fb" data-sosa="廃棄" onclick="setLF(this)">廃棄</button>
+    </div>
+    <div class="tc">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="si" id="ls" placeholder="機材ID・機材名・入力者で検索..." oninput="filterL()"></div>
+      <button class="btn btn-ghost" onclick="exportCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSV出力</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="log-count"></div>
+    <div class="tw"><table><thead><tr><th>操作日時</th><th>機材ID</th><th>機材名</th><th>操作種別</th><th>移動元</th><th>移動先</th><th>入力者</th><th>備考</th></tr></thead><tbody id="l-tbody"><tr class="loading-row"><td colspan="8">読み込み中...</td></tr></tbody></table></div>
+  </div>
+</main>
+
+<!-- 機材パネル -->
+<div class="po" id="kp-ov" onclick="closePO(event,'kp-ov')">
+  <div class="panel">
+    <div class="ph">
+      <div><div class="ph-title" id="kp-title">新規機材登録</div><div class="ph-id" id="kp-idlbl"></div></div>
+      <button class="pc" onclick="closeP('kp-ov')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="pb">
+      <input type="hidden" id="kp-id">
+      <div class="fg"><div class="fl">発行ID</div><div class="fi fi-id" id="kp-next">—</div><div class="fhint">登録時に自動採番されます</div></div>
+      <div class="fdiv"></div>
+      <div class="fg"><div class="fl">機材名 <span class="req">必須</span></div><input class="fi" id="kp-name" placeholder="例: 水中ポンプ、発電機" oninput="ckK()"></div>
+      <div class="fg"><div class="fl">型番</div><input class="fi" id="kp-kataban" placeholder="例: HS2.4S（不明なら空白）"></div>
+      <div class="fg"><div class="fl">属性 <span class="req">必須</span></div><select class="fi" id="kp-attr" oninput="ckK()"><option value="">選択してください</option></select></div>
+      <div class="fg-row">
+        <div class="fg"><div class="fl">初期状態</div><select class="fi" id="kp-jotai"><option>在庫中</option><option>使用中</option><option>修理中</option><option>故障中</option></select></div>
+        <div class="fg"><div class="fl">初期場所 <span class="req">必須</span></div><input class="fi" id="kp-basho" value="置き場" oninput="ckK()"></div>
+      </div>
+      <div class="fg"><div class="fl">備考</div><input class="fi" id="kp-bikou" placeholder="タグ番号・特記事項など"></div>
+      <div class="fg"><div class="fl">登録者 <span class="req">必須</span></div><input class="fi" id="kp-torokusha" placeholder="氏名を入力" oninput="ckK()"></div>
+    </div>
+    <div class="pf">
+      <button class="btn btn-ghost" onclick="closeP('kp-ov')">キャンセル</button>
+      <button class="btn btn-danger btn-sm" id="kp-haki" onclick="hakiK()" style="display:none;">廃棄</button>
+      <button class="btn btn-primary" id="kp-submit" onclick="submitK()" disabled>登録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 入力者パネル -->
+<div class="po" id="mp-ov" onclick="closePO(event,'mp-ov')">
+  <div class="panel">
+    <div class="ph">
+      <div><div class="ph-title" id="mp-title">担当者追加</div><div class="ph-id" id="mp-idlbl"></div></div>
+      <button class="pc" onclick="closeP('mp-ov')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="pb">
+      <input type="hidden" id="mp-id">
+      <div class="fg"><div class="fl">氏名 <span class="req">必須</span></div><input class="fi" id="mp-name" placeholder="例: 田仲克弥" oninput="ckM()"></div>
+      <div class="fg">
+        <div class="fl">所属</div>
+        <select class="fi" id="mp-group">
+          <option value="">選択してください</option>
+          <option value="ネクサス">株式会社ネクサス</option>
+          <option value="フォレスト総建">フォレスト総建株式会社</option>
+          <option value="伊賀林業">株式会社伊賀林業</option>
+          <option value="ルプラス">株式会社ルプラス</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="fg"><div class="fl">表示順</div><input class="fi" type="number" id="mp-order" placeholder="数字が小さいほど上に表示" min="1"><div class="fhint">入力フォームでの並び順。空白の場合は末尾に追加されます。</div></div>
+    </div>
+    <div class="pf">
+      <button class="btn btn-ghost" onclick="closeP('mp-ov')">キャンセル</button>
+      <button class="btn btn-danger btn-sm" id="mp-del" onclick="delM()" style="display:none;">削除</button>
+      <button class="btn btn-primary" id="mp-submit" onclick="submitM()" disabled>追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- トースト -->
+<div class="toast" id="toast"><svg id="toast-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyFkBD5ApfA10dhrUEqzRD6_GjUO7m-iGN6Zaj92w3D0LnaO0BpslzK2KRQjyB8XnSnug/exec';
+
+const KIZAI_ATTRS = ['ポンプ類','発電機','照明','測量機器','切断・研削','掘削・圧縮','運搬・揚重','足場・仮設','電動工具','手工具','その他'];
+
+let allKizai=[], allMembers=[], allLogs=[], usageMap={}, logFilter='', editKId=null, editMId=null;
+
+// ページ切替
+function sw(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// 初期化
+window.onload = async () => {
+  KIZAI_ATTRS.forEach(a => {
+    const o=document.createElement('option'); o.value=o.textContent=a;
+    document.getElementById('kp-attr').appendChild(o);
+  });
+  const lt = localStorage.getItem('adminLastTorokusha');
+  if(lt) document.getElementById('kp-torokusha').value = lt;
+  await Promise.all([loadK(), loadM(), loadL()]);
+  renderDash();
+};
+
+async function loadK() {
+  try { const r=await fetch(`${GAS_URL}?action=getAll`); allKizai=await r.json(); if(!Array.isArray(allKizai)) allKizai=[]; renderKT(allKizai); updNextId(); }
+  catch { document.getElementById('k-tbody').innerHTML='<tr class="loading-row"><td colspan="8">⚠ 読み込み失敗</td></tr>'; }
+}
+async function loadM() {
+  try { const r=await fetch(`${GAS_URL}?action=getMembers`); allMembers=await r.json(); if(!Array.isArray(allMembers)) allMembers=[]; renderMT(allMembers); }
+  catch { document.getElementById('m-tbody').innerHTML='<tr class="loading-row"><td colspan="6">⚠ 読み込み失敗</td></tr>'; }
+}
+async function loadL() {
+  try { const r=await fetch(`${GAS_URL}?action=getLogs&limit=300`); allLogs=await r.json(); if(!Array.isArray(allLogs)) allLogs=[]; buildUsage(); renderLT(allLogs); }
+  catch { document.getElementById('l-tbody').innerHTML='<tr class="loading-row"><td colspan="8">⚠ 読み込み失敗</td></tr>'; }
+}
+
+// 使用率
+function buildUsage() {
+  usageMap={};
+  const cut=new Date(); cut.setDate(cut.getDate()-90);
+  allLogs.forEach(l => {
+    if(l['操作種別']!=='持出') return;
+    const dt=new Date(l['操作日時']); if(isNaN(dt)||dt<cut) return;
+    const id=String(l['機材ID']); usageMap[id]=(usageMap[id]||0)+1;
+  });
+}
+
+// ダッシュボード
+function renderDash() {
+  const active=allKizai.filter(k=>k['状態']!=='破棄');
+  let zaiko=0,shiyochu=0,shuri=0,haki=0;
+  allKizai.forEach(k=>{
+    switch(k['状態']){case'在庫中':zaiko++;break;case'使用中':shiyochu++;break;case'修理中':case'故障中':shuri++;break;case'破棄':haki++;break;}
+  });
+  document.getElementById('st-total').textContent=active.length;
+  document.getElementById('st-zaiko').textContent=zaiko;
+  document.getElementById('st-shiyochu').textContent=shiyochu;
+  document.getElementById('st-shuri').textContent=shuri;
+  document.getElementById('st-haki').textContent=haki;
+  document.getElementById('dash-updated').textContent='最終更新: '+new Date().toLocaleString('ja-JP');
+
+  // 属性別
+  const am={};
+  active.forEach(k=>{const a=k['属性']||'その他';if(!am[a])am[a]={t:0,s:0};am[a].t++;if(k['状態']==='使用中')am[a].s++;});
+  document.getElementById('attr-grid').innerHTML=Object.entries(am).sort((a,b)=>b[1].t-a[1].t).map(([a,d])=>{
+    const pct=d.t>0?Math.round(d.s/d.t*100):0;
+    return `<div class="attr-card"><div class="attr-card-name">${esc(a)}</div><div class="attr-card-nums"><span class="attr-card-total">${d.t}</span><span class="attr-card-detail">台 / 使用中${d.s}</span></div><div class="attr-mini-bar"><div class="attr-mini-fill" style="width:${pct}%"></div></div></div>`;
+  }).join('')||'<div style="color:var(--text3);font-size:12px;">データなし</div>';
+
+  // ログフィード
+  const feed=document.getElementById('dash-feed');
+  const rec=allLogs.slice(0,10);
+  feed.innerHTML=rec.length===0?'<div class="lf-item"><span style="color:var(--text3);font-size:12px;">操作履歴がありません</span></div>':
+    rec.map(l=>{const b=l['移動先/持出先']?` → ${esc(l['移動先/持出先'])}`:''; return `<div class="lf-item"><div class="lf-dot" style="background:${sc(l['操作種別'])}"></div><div class="lf-main"><div class="lf-name">ID:${esc(String(l['機材ID']))} ${esc(l['機材名']||'')} — ${esc(l['操作種別']||'')}${b}</div><div class="lf-sub">${esc(l['入力者']||'')} ・ ${esc(String(l['操作日時']||''))}</div></div></div>`;}).join('');
+
+  // 使用率ランキング
+  const ranked=active.map(k=>({...k,cnt:usageMap[String(k['機材ID'])]||0})).sort((a,b)=>b.cnt-a.cnt).slice(0,15);
+  const mx=ranked[0]?.cnt||1;
+  document.getElementById('usage-list').innerHTML=ranked.length===0?'<div style="color:var(--text3);font-size:12px;">ログが記録されると表示されます</div>':
+    ranked.map((k,i)=>{const pct=Math.round(k.cnt/mx*100); const cls=pct>=70?'u-high':pct>=30?'u-mid':'u-low';
+      return `<div class="usage-item ${cls}"><div class="usage-hd"><div class="usage-name"><span style="font-size:11px;color:var(--text3);width:18px;text-align:right;">${i+1}</span>${esc(k['機材名']||'—')}${k['属性']?`<span class="usage-attr-tag">${esc(k['属性'])}</span>`:''}</div><div class="usage-pct">${k.cnt}回</div></div><div class="usage-bar-bg"><div class="usage-bar-fill" style="width:${pct}%"></div></div></div>`;
+    }).join('');
+}
+
+// 機材テーブル
+function renderKT(data) {
+  document.getElementById('kizai-count').textContent=`${data.length} 件表示`;
+  const mx=Math.max(...data.map(k=>usageMap[String(k['機材ID'])]||0),1);
+  document.getElementById('k-tbody').innerHTML=data.length===0?'<tr class="empty-row"><td colspan="8">該当なし</td></tr>':
+    data.map(k=>{const id=String(k['機材ID']),cnt=usageMap[id]||0,pct=Math.round(cnt/mx*100);
+      const bc=pct>=70?'var(--amber)':pct>=30?'var(--accent)':'var(--green)';
+      return `<tr onclick='editK(${JSON.stringify(k).replace(/'/g,"&#39;")})'><td class="td-mono">${esc(id)}</td><td style="font-weight:500">${esc(k['機材名']||'—')}</td><td class="td-sub">${esc(k['型番']||'—')}</td><td><span style="font-size:11px;color:var(--text2)">${esc(k['属性']||'—')}</span></td><td><span class="badge ${jc(k['状態'])}">${esc(k['状態']||'—')}</span></td><td class="td-sub td-trunc">${esc(k['使用場所']||'—')}</td><td><div class="uc"><div class="uc-bar"><div class="uc-fill" style="width:${pct}%;background:${bc}"></div></div><span class="uc-pct" style="color:${bc}">${cnt}回</span></div></td><td class="td-sub td-trunc">${esc(k['備考']||'')}</td></tr>`;
+    }).join('');
+}
+function filterK(){const q=document.getElementById('ks').value.toLowerCase(),jt=document.getElementById('kf').value;renderKT(allKizai.filter(k=>(!q||String(k['機材ID']).includes(q)||(k['機材名']||'').toLowerCase().includes(q)||(k['型番']||'').toLowerCase().includes(q)||(k['属性']||'').toLowerCase().includes(q))&&(!jt||k['状態']===jt)));}
+
+// 入力者テーブル
+function renderMT(data) {
+  document.getElementById('member-count').textContent=`${data.length} 名登録`;
+  const mc={};allLogs.forEach(l=>{if(l['入力者'])mc[l['入力者']]=(mc[l['入力者']]||0)+1;});
+  document.getElementById('m-tbody').innerHTML=data.length===0?'<tr class="empty-row"><td colspan="6">担当者が登録されていません</td></tr>':
+    data.map((m,i)=>`<tr onclick='editM(${JSON.stringify(m).replace(/'/g,"&#39;")})'><td class="td-sub">${i+1}</td><td style="font-weight:500">${esc(m['氏名']||'—')}</td><td class="td-sub">${esc(m['所属']||'—')}</td><td class="td-sub">${m['表示順']||'—'}</td><td class="td-sub">${esc(m['登録日']||'—')}</td><td><span style="font-weight:600">${mc[m['氏名']]||0}</span> <span class="td-sub">回</span></td></tr>`).join('');
+}
+function filterM(){const q=document.getElementById('ms').value.toLowerCase();renderMT(allMembers.filter(m=>!q||(m['氏名']||'').toLowerCase().includes(q)||(m['所属']||'').toLowerCase().includes(q)));}
+
+// ログテーブル
+function renderLT(data) {
+  document.getElementById('log-count').textContent=`${data.length} 件`;
+  document.getElementById('l-tbody').innerHTML=data.length===0?'<tr class="empty-row"><td colspan="8">ログがありません</td></tr>':
+    data.map(l=>`<tr><td class="td-sub" style="white-space:nowrap">${esc(String(l['操作日時']||''))}</td><td class="td-mono">${esc(String(l['機材ID']||''))}</td><td style="font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l['機材名']||'—')}</td><td><span class="badge ${lc(l['操作種別'])}">${esc(l['操作種別']||'')}</span></td><td class="td-sub">${esc(l['移動元']||'—')}</td><td class="td-sub">${esc(l['移動先/持出先']||'—')}</td><td class="td-sub">${esc(l['入力者']||'—')}</td><td class="td-sub td-trunc">${esc(l['備考']||'')}</td></tr>`).join('');
+}
+function setLF(btn){document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');logFilter=btn.dataset.sosa;filterL();}
+function filterL(){const q=document.getElementById('ls').value.toLowerCase();renderLT(allLogs.filter(l=>(!logFilter||l['操作種別']===logFilter)&&(!q||String(l['機材ID']).includes(q)||(l['機材名']||'').toLowerCase().includes(q)||(l['入力者']||'').toLowerCase().includes(q))));}
+function exportCSV(){const q=document.getElementById('ls').value.toLowerCase();const d=allLogs.filter(l=>(!logFilter||l['操作種別']===logFilter)&&(!q||String(l['機材ID']).includes(q)||(l['機材名']||'').toLowerCase().includes(q)||(l['入力者']||'').toLowerCase().includes(q)));const h=['操作日時','機材ID','機材名','操作種別','移動元','移動先/持出先','入力者','備考'];const csv='\uFEFF'+[h,...d.map(l=>h.map(k=>String(l[k]||'').replace(/,/g,'、')))].map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`操作ログ_${new Date().toLocaleDateString('ja-JP').replace(/\//g,'')}.csv`;a.click();}
+
+// 機材パネル
+function updNextId(){let m=10000;allKizai.forEach(k=>{const n=parseInt(k['機材ID']);if(!isNaN(n)&&n>m)m=n;});document.getElementById('kp-next').textContent=m+1;}
+function openKP(){
+  editKId=null;
+  document.getElementById('kp-title').textContent='新規機材登録';
+  document.getElementById('kp-idlbl').textContent='';
+  ['kp-id','kp-name','kp-kataban','kp-bikou'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('kp-attr').value='';
+  document.getElementById('kp-jotai').value='在庫中';
+  document.getElementById('kp-basho').value='置き場';
+  document.getElementById('kp-haki').style.display='none';
+  document.getElementById('kp-submit').textContent='登録する';
+  updNextId(); ckK();
+  document.getElementById('kp-ov').classList.add('open');
+}
+function editK(k){
+  editKId=k['機材ID'];
+  document.getElementById('kp-title').textContent=k['機材名']||'機材編集';
+  document.getElementById('kp-idlbl').textContent='ID: '+k['機材ID'];
+  document.getElementById('kp-id').value=k['機材ID'];
+  document.getElementById('kp-name').value=k['機材名']||'';
+  document.getElementById('kp-kataban').value=k['型番']||'';
+  document.getElementById('kp-attr').value=k['属性']||'';
+  document.getElementById('kp-jotai').value=k['状態']||'在庫中';
+  document.getElementById('kp-basho').value=k['使用場所']||'';
+  document.getElementById('kp-bikou').value=k['備考']||'';
+  document.getElementById('kp-next').textContent=k['機材ID'];
+  document.getElementById('kp-haki').style.display=k['状態']==='破棄'?'none':'inline-flex';
+  document.getElementById('kp-submit').textContent='保存する';
+  ckK(); document.getElementById('kp-ov').classList.add('open');
+}
+function ckK(){document.getElementById('kp-submit').disabled=!(document.getElementById('kp-name').value.trim()&&document.getElementById('kp-attr').value&&document.getElementById('kp-basho').value.trim()&&document.getElementById('kp-torokusha').value.trim());}
+async function submitK(){
+  const btn=document.getElementById('kp-submit'); btn.disabled=true; btn.textContent='処理中...';
+  const tor=document.getElementById('kp-torokusha').value.trim(); localStorage.setItem('adminLastTorokusha',tor);
+  const isE=!!editKId;
+  const p={action:isE?'updateKizai':'addKizai',id:editKId,kizaiName:document.getElementById('kp-name').value.trim(),kataban:document.getElementById('kp-kataban').value.trim(),attr:document.getElementById('kp-attr').value,jotai:document.getElementById('kp-jotai').value,basho:document.getElementById('kp-basho').value.trim(),bikou:document.getElementById('kp-bikou').value.trim(),nyuryokusha:tor};
+  try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(p)});const res=await r.json();if(res.error)toast2(false,res.error);else{toast2(true,res.message||(isE?'更新しました':'登録しました'));closeP('kp-ov');await loadK();renderDash();}}catch{toast2(false,'通信エラー');}
+  btn.disabled=false; btn.textContent=isE?'保存する':'登録する'; ckK();
+}
+async function hakiK(){if(!confirm(`ID:${editKId} を廃棄状態にしますか？`))return;try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'updateKizai',id:editKId,jotai:'破棄'})});const res=await r.json();toast2(!res.error,res.error||'廃棄処理しました');if(!res.error){closeP('kp-ov');await loadK();renderDash();}}catch{toast2(false,'通信エラー');}}
+
+// 入力者パネル
+function openMP(){
+  editMId=null;
+  document.getElementById('mp-title').textContent='担当者追加';
+  document.getElementById('mp-idlbl').textContent='';
+  ['mp-id','mp-name','mp-order'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('mp-group').value='';
+  document.getElementById('mp-del').style.display='none';
+  document.getElementById('mp-submit').textContent='追加する';
+  ckM(); document.getElementById('mp-ov').classList.add('open');
+}
+function editM(m){
+  editMId=m['ID']||m['氏名'];
+  document.getElementById('mp-title').textContent=m['氏名'];
+  document.getElementById('mp-idlbl').textContent=m['所属']||'';
+  document.getElementById('mp-id').value=m['ID']||'';
+  document.getElementById('mp-name').value=m['氏名']||'';
+  document.getElementById('mp-group').value=m['所属']||'';
+  document.getElementById('mp-order').value=m['表示順']||'';
+  document.getElementById('mp-del').style.display='inline-flex';
+  document.getElementById('mp-submit').textContent='保存する';
+  ckM(); document.getElementById('mp-ov').classList.add('open');
+}
+function ckM(){document.getElementById('mp-submit').disabled=!document.getElementById('mp-name').value.trim();}
+async function submitM(){
+  const btn=document.getElementById('mp-submit'); btn.disabled=true; btn.textContent='処理中...';
+  const isE=!!document.getElementById('mp-id').value;
+  const p={action:isE?'updateMember':'addMember',id:document.getElementById('mp-id').value,name:document.getElementById('mp-name').value.trim(),group:document.getElementById('mp-group').value,order:document.getElementById('mp-order').value||''};
+  try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(p)});const res=await r.json();if(res.error)toast2(false,res.error);else{toast2(true,res.message||(isE?'更新しました':'追加しました'));closeP('mp-ov');await loadM();}}catch{toast2(false,'通信エラー');}
+  btn.disabled=false; btn.textContent=isE?'保存する':'追加する'; ckM();
+}
+async function delM(){const n=document.getElementById('mp-name').value;if(!confirm(`「${n}」を削除しますか？`))return;const p={action:'deleteMember',id:document.getElementById('mp-id').value,name:n};try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(p)});const res=await r.json();toast2(!res.error,res.error||'削除しました');if(!res.error){closeP('mp-ov');await loadM();}}catch{toast2(false,'通信エラー');}}
+
+// パネル
+function closeP(id){document.getElementById(id).classList.remove('open');}
+function closePO(e,id){if(e.target.id===id)closeP(id);}
+
+// ユーティリティ
+function jc(j){return{在庫中:'bz',使用中:'bs',修理中:'br',故障中:'bk',破棄:'bh'}[j]||'bh';}
+function lc(s){return{持出:'bm',返却:'bhe',移動:'bi',修理依頼:'bsr',廃棄:'bdi'}[s]||'';}
+function sc(s){return{持出:'#3b82f6',返却:'#22c55e',移動:'#f59e0b',修理依頼:'#a78bfa',廃棄:'#ef4444'}[s]||'#64748b';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let ttimer;
+function toast2(ok,msg){const t=document.getElementById('toast'),ic=document.getElementById('toast-ic');document.getElementById('toast-msg').textContent=msg;t.className='toast '+(ok?'ok':'ng');ic.innerHTML=ok?'<polyline points="20 6 9 17 4 12"/>':'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';clearTimeout(ttimer);t.classList.add('show');ttimer=setTimeout(()=>t.classList.remove('show'),3200);}
+</script>
+</body>
+</html>

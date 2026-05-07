@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>機材管理 | ECPGROUP</title>
+<style>
+:root {
+  --bg:        #0d0f12;
+  --bg2:       #161a1f;
+  --bg3:       #1e2329;
+  --border:    #2a3040;
+  --border2:   #3a4455;
+  --text:      #e8ecf0;
+  --text2:     #8899aa;
+  --text3:     #556677;
+  --accent:    #3b82f6;
+  --accent2:   #1d4ed8;
+  --green:     #22c55e;
+  --green-bg:  #052e16;
+  --amber:     #f59e0b;
+  --amber-bg:  #2d1b00;
+  --red:       #ef4444;
+  --red-bg:    #2d0a0a;
+  --purple:    #a78bfa;
+  --purple-bg: #1e1040;
+  --gray:      #64748b;
+  --radius:    12px;
+  --radius-sm: 8px;
+  --font: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+/* ヘッダー */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-logo {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+.header-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* メインコンテナ */
+.container { padding: 0 16px; }
+
+/* 機材IDセクション（最上部・強調） */
+.id-section {
+  margin: 16px 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.id-section-header {
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.id-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.id-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 16px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+  width: 100%;
+}
+.id-input::placeholder { color: var(--text3); font-size: 20px; font-weight: 400; }
+.scan-btn {
+  padding: 16px;
+  background: none;
+  border: none;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+.scan-btn:active { color: var(--accent); }
+.scan-btn svg { width: 28px; height: 28px; }
+
+/* 機材情報プレビュー */
+.kizai-preview {
+  margin: 0 0 12px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: none;
+}
+.kizai-preview.visible { display: block; }
+.kizai-preview-inner {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.kizai-preview-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.kizai-preview-icon svg { width: 20px; height: 20px; }
+.kizai-preview-body { flex: 1; min-width: 0; }
+.kizai-preview-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kizai-preview-sub {
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.status-zaiko   { background: var(--green-bg);  color: var(--green);  }
+.status-shiyochu{ background: var(--amber-bg);  color: var(--amber);  }
+.status-shuri   { background: var(--purple-bg); color: var(--purple); }
+.status-kosho   { background: var(--red-bg);    color: var(--red);    }
+.status-haki    { background: var(--bg3);       color: var(--text3);  }
+
+/* エラー/ローディング */
+.id-status {
+  padding: 8px 16px 12px;
+  font-size: 12px;
+  min-height: 28px;
+}
+.id-status.loading { color: var(--text2); }
+.id-status.error   { color: var(--red); }
+.id-status.success { color: var(--green); }
+
+/* 操作種別 */
+.sosa-section {
+  margin-bottom: 16px;
+}
+.sosa-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+.sosa-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.sosa-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-appearance: none;
+}
+.sosa-btn svg { width: 20px; height: 20px; }
+.sosa-btn span { font-size: 11px; font-weight: 500; color: var(--text2); }
+.sosa-btn.active-mochidashi { background: rgba(59,130,246,0.15); border-color: var(--accent); }
+.sosa-btn.active-mochidashi span { color: var(--accent); }
+.sosa-btn.active-mochidashi svg { color: var(--accent); }
+.sosa-btn.active-henkyaku { background: rgba(34,197,94,0.12); border-color: var(--green); }
+.sosa-btn.active-henkyaku span { color: var(--green); }
+.sosa-btn.active-henkyaku svg { color: var(--green); }
+.sosa-btn.active-ido { background: rgba(245,158,11,0.12); border-color: var(--amber); }
+.sosa-btn.active-ido span { color: var(--amber); }
+.sosa-btn.active-ido svg { color: var(--amber); }
+.sosa-btn.active-shuri { background: rgba(167,139,250,0.12); border-color: var(--purple); }
+.sosa-btn.active-shuri span { color: var(--purple); }
+.sosa-btn.active-shuri svg { color: var(--purple); }
+.sosa-btn.active-haki { background: rgba(239,68,68,0.12); border-color: var(--red); }
+.sosa-btn.active-haki span { color: var(--red); }
+.sosa-btn.active-haki svg { color: var(--red); }
+
+/* フォームカード */
+.form-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.form-card-header {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.form-row {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  min-height: 52px;
+}
+.form-row:last-child { border-bottom: none; }
+.form-row-label {
+  font-size: 13px;
+  color: var(--text2);
+  width: 80px;
+  flex-shrink: 0;
+}
+.form-row-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 0;
+  font-size: 15px;
+  color: var(--text);
+  font-family: var(--font);
+  width: 100%;
+}
+.form-row-input::placeholder { color: var(--text3); }
+select.form-row-input {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.form-row-input:focus { color: var(--text); }
+
+/* 移動先表示ロジック */
+.location-section { display: none; }
+.location-section.visible { display: block; }
+
+/* よく使う場所 */
+.quick-locations {
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+}
+.quick-loc-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  -webkit-appearance: none;
+  transition: all 0.15s;
+}
+.quick-loc-btn:active {
+  background: rgba(59,130,246,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.quick-loc-hint {
+  font-size: 11px;
+  color: var(--text3);
+  padding: 0 14px 8px;
+}
+
+/* 入力者選択 */
+.nyuryokusha-grid {
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.person-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  -webkit-appearance: none;
+  transition: all 0.15s;
+}
+.person-btn.selected {
+  background: rgba(59,130,246,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+.person-btn.other-btn {
+  border-style: dashed;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.person-btn.other-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+/* その他 自由入力エリア */
+.other-input-wrap {
+  display: none;
+  padding: 0 14px 12px;
+  border-top: 1px solid var(--border);
+}
+.other-input-wrap.visible { display: block; }
+.other-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  outline: none;
+  padding: 10px 14px;
+  font-size: 15px;
+  color: var(--text);
+  font-family: var(--font);
+}
+.other-input::placeholder { color: var(--text3); }
+.other-input-hint { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+
+/* 修理先入力（修理依頼選択時のみ表示） */
+.shuri-section { display: none; }
+.shuri-section.visible { display: block; }
+.required-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--red);
+  background: var(--red-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* 操作履歴プレビュー */
+.log-preview {
+  margin-bottom: 16px;
+  display: none;
+}
+.log-preview.visible { display: block; }
+.log-preview-header {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+.log-items { }
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+.log-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.log-item-body { flex: 1; min-width: 0; }
+.log-item-main { font-size: 13px; color: var(--text); margin-bottom: 2px; }
+.log-item-sub { font-size: 11px; color: var(--text2); }
+
+/* 送信ボタン */
+.submit-area {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  z-index: 100;
+}
+.submit-btn {
+  width: 100%;
+  padding: 17px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+.submit-btn:active { background: var(--accent2); transform: scale(0.98); }
+.submit-btn:disabled { background: var(--bg3); color: var(--text3); }
+
+/* モーダル */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+.modal {
+  background: var(--bg2);
+  border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%;
+  padding: 24px 20px 40px;
+  transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-overlay.visible .modal { transform: translateY(0); }
+.modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.modal-sub {
+  font-size: 13px;
+  color: var(--text2);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.modal-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(34,197,94,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.modal-icon.error-icon { background: rgba(239,68,68,0.15); }
+.modal-icon svg { width: 28px; height: 28px; color: var(--green); }
+.modal-icon.error-icon svg { color: var(--red); }
+.modal-close-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+/* スキャナーモーダル */
+.scanner-modal {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  display: none;
+}
+.scanner-modal.active { display: flex; }
+.scanner-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.5);
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+}
+.scanner-header-title { font-size: 16px; font-weight: 600; }
+.scanner-close { background: none; border: none; color: #fff; padding: 8px; cursor: pointer; }
+.scanner-close svg { width: 24px; height: 24px; }
+#scanner-video { width: 100%; height: 100%; object-fit: cover; }
+.scanner-guide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.scanner-frame {
+  width: 240px;
+  height: 240px;
+  position: relative;
+}
+.scanner-frame::before, .scanner-frame::after,
+.scanner-corner-bl, .scanner-corner-br {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-color: #fff;
+  border-style: solid;
+}
+.scanner-frame::before { top: 0; left: 0; border-width: 3px 0 0 3px; }
+.scanner-frame::after  { top: 0; right: 0; border-width: 3px 3px 0 0; }
+.scanner-corner-bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; }
+.scanner-corner-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; }
+.scanner-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(59,130,246,0.8), transparent);
+  animation: scan 2s ease-in-out infinite;
+}
+@keyframes scan {
+  0% { top: 10%; }
+  50% { top: 90%; }
+  100% { top: 10%; }
+}
+.scanner-hint {
+  position: absolute;
+  bottom: 60px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  padding: 0 20px;
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.2s ease; }
+
+.section-divider {
+  margin: 16px 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  text-transform: uppercase;
+  padding-left: 2px;
+}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="header-logo">ECPGROUP</div>
+  <div class="header-title">機材管理</div>
+  <div style="width:60px"></div>
+</div>
+
+<div class="container">
+
+  <!-- 機材ID入力 -->
+  <div class="id-section">
+    <div class="id-section-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M12 7h.01M17 7h.01M7 12h.01M12 12h.01M17 12h.01M7 17h.01M12 17h.01M17 17h.01"/></svg>
+      機材ID
+    </div>
+    <div class="id-input-row">
+      <input type="number" class="id-input" id="kizaiId" placeholder="例: 10001" inputmode="numeric" autocomplete="off">
+      <button class="scan-btn" id="scanBtn" title="QRコードをスキャン" aria-label="QRコードスキャン">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+          <rect x="7" y="7" width="4" height="4" rx="1"/><rect x="13" y="7" width="4" height="4" rx="1"/><rect x="7" y="13" width="4" height="4" rx="1"/><rect x="13" y="13" width="4" height="4" rx="1"/>
+        </svg>
+      </button>
+    </div>
+    <div class="id-status" id="idStatus"></div>
+  </div>
+
+  <!-- 機材情報プレビュー -->
+  <div class="kizai-preview" id="kizaiPreview">
+    <div class="kizai-preview-inner">
+      <div class="kizai-preview-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div class="kizai-preview-body">
+        <div class="kizai-preview-name" id="previewName">—</div>
+        <div class="kizai-preview-sub" id="previewSub">—</div>
+        <span class="status-badge" id="previewStatus">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作種別 -->
+  <div class="sosa-section">
+    <div class="sosa-label">操作種別</div>
+    <div class="sosa-grid">
+      <button class="sosa-btn" data-sosa="持出" onclick="selectSosa(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span>持出</span>
+      </button>
+      <button class="sosa-btn" data-sosa="返却" onclick="selectSosa(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>返却</span>
+      </button>
+      <button class="sosa-btn" data-sosa="移動" onclick="selectSosa(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M12 7v10M9 10l3-3 3 3"/></svg>
+        <span>移動</span>
+      </button>
+      <button class="sosa-btn" data-sosa="修理依頼" onclick="selectSosa(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span>修理</span>
+      </button>
+      <button class="sosa-btn" data-sosa="廃棄" onclick="selectSosa(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+        <span>廃棄</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 場所入力（持出・移動のとき表示） -->
+  <div class="location-section" id="locationSection">
+    <div class="form-card">
+      <div class="form-card-header" id="locationLabel">持出先・使用場所</div>
+      <div class="form-row">
+        <div class="form-row-label">場所</div>
+        <input type="text" class="form-row-input" id="bashoTo" placeholder="現場名・場所を入力" autocomplete="off">
+      </div>
+      <div class="quick-loc-hint">よく使う場所:</div>
+      <div class="quick-locations" id="quickLocations">
+        <!-- JSで生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 修理先入力（修理依頼のとき表示） -->
+  <div class="shuri-section" id="shuriSection">
+    <div class="form-card">
+      <div class="form-card-header">
+        修理先・持込先
+        <span class="required-label">必須</span>
+      </div>
+      <div class="form-row">
+        <div class="form-row-label">修理先</div>
+        <input type="text" class="form-row-input" id="shuriSaki" placeholder="例: 大阪レンタル、メーカー修理" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- 入力者 -->
+  <div class="section-divider">入力者</div>
+  <div class="form-card">
+    <div class="nyuryokusha-grid" id="nyuryokushaGrid">
+      <!-- JSで生成 -->
+    </div>
+    <!-- その他 自由入力 -->
+    <div class="other-input-wrap" id="otherInputWrap">
+      <p class="other-input-hint">氏名を入力してください</p>
+      <input type="text" class="other-input" id="otherName" placeholder="例: 山田太郎" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- 備考 -->
+  <div class="section-divider">備考（任意）</div>
+  <div class="form-card">
+    <div class="form-row" style="align-items: flex-start;">
+      <textarea class="form-row-input" id="bikou" rows="3" placeholder="特記事項があれば入力" style="resize:none; padding-top:14px; line-height:1.5;"></textarea>
+    </div>
+  </div>
+
+  <!-- 操作履歴 -->
+  <div class="log-preview" id="logPreview">
+    <div class="log-preview-header">この機材の最近の操作</div>
+    <div class="log-items" id="logItems"></div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- 送信ボタン -->
+<div class="submit-area">
+  <button class="submit-btn" id="submitBtn" onclick="submitForm()" disabled>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    送信する
+  </button>
+</div>
+
+<!-- 完了モーダル -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <div class="modal-icon" id="modalIcon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="modal-title" id="modalTitle">送信しました</div>
+    <div class="modal-sub" id="modalSub"></div>
+    <button class="modal-close-btn" onclick="closeModal()">続けて入力</button>
+  </div>
+</div>
+
+<!-- QRスキャナー -->
+<div class="scanner-modal" id="scannerModal">
+  <div class="scanner-header">
+    <div class="scanner-header-title">QRコードをスキャン</div>
+    <button class="scanner-close" onclick="closeScannerModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <video id="scanner-video" playsinline autoplay muted></video>
+  <div class="scanner-guide">
+    <div class="scanner-frame">
+      <div class="scanner-corner-bl"></div>
+      <div class="scanner-corner-br"></div>
+      <div class="scanner-line"></div>
+    </div>
+  </div>
+  <div class="scanner-hint">機材タグのQRコードをカメラに向けてください</div>
+</div>
+
+<script>
+// ==========================================
+// 設定
+// ==========================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyFkBD5ApfA10dhrUEqzRD6_GjUO7m-iGN6Zaj92w3D0LnaO0BpslzK2KRQjyB8XnSnug/exec';
+
+// よく使う場所
+const QUICK_LOCATIONS = ['置き場', '東山置き場', '事務所', '福禄台', '鳥見町', '押熊', '梶川', '保田', '森川', '社用車'];
+
+// ==========================================
+// 初期化
+// ==========================================
+let selectedSosa = null;
+let selectedNyuryokusha = null;
+let kizaiData = null;
+let fetchTimer = null;
+
+window.onload = async () => {
+  // よく使う場所ボタン生成
+  const ql = document.getElementById('quickLocations');
+  QUICK_LOCATIONS.forEach(loc => {
+    const btn = document.createElement('button');
+    btn.className = 'quick-loc-btn';
+    btn.textContent = loc;
+    btn.onclick = () => {
+      document.getElementById('bashoTo').value = loc;
+      checkSubmittable();
+    };
+    ql.appendChild(btn);
+  });
+
+  // その他入力欄のリアルタイムチェック
+  document.getElementById('otherName').addEventListener('input', (e) => {
+    selectedNyuryokusha = e.target.value.trim() || null;
+    checkSubmittable();
+  });
+
+  // 入力者をGASから取得して生成
+  await loadMembers();
+
+  checkSubmittable();
+};
+
+// GASから入力者を取得してボタン生成
+async function loadMembers() {
+  const ng = document.getElementById('nyuryokushaGrid');
+  ng.innerHTML = '<span style="font-size:12px;color:var(--text3);padding:4px 8px;">読み込み中...</span>';
+
+  try {
+    const res = await fetch(`${GAS_URL}?action=getMembers`);
+    const members = await res.json();
+
+    ng.innerHTML = ''; // クリア
+
+    const lastMember = localStorage.getItem('lastMember');
+
+    if (Array.isArray(members) && members.length > 0) {
+      members.forEach(m => {
+        const name = m['氏名'] || '';
+        if (!name) return;
+        const btn = document.createElement('button');
+        btn.className = 'person-btn' + (name === lastMember ? ' selected' : '');
+        btn.textContent = name;
+        btn.onclick = () => selectMember(btn, name);
+        ng.appendChild(btn);
+        if (name === lastMember) selectedNyuryokusha = name;
+      });
+    } else {
+      ng.innerHTML = '<span style="font-size:12px;color:var(--text3);padding:4px 8px;">入力者マスタに登録がありません</span>';
+    }
+  } catch {
+    ng.innerHTML = '<span style="font-size:12px;color:var(--red);padding:4px 8px;">入力者の取得に失敗しました</span>';
+  }
+
+  // 「その他」ボタンを末尾に追加
+  const otherBtn = document.createElement('button');
+  otherBtn.className = 'person-btn other-btn';
+  otherBtn.id = 'otherPersonBtn';
+  otherBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>その他`;
+  otherBtn.onclick = () => selectOther(otherBtn);
+  document.getElementById('nyuryokushaGrid').appendChild(otherBtn);
+
+  checkSubmittable();
+}
+
+// ==========================================
+// 機材ID入力
+// ==========================================
+document.getElementById('kizaiId').addEventListener('input', (e) => {
+  const id = e.target.value.trim();
+  clearTimeout(fetchTimer);
+
+  if (!id) {
+    resetKizaiPreview();
+    checkSubmittable();
+    return;
+  }
+
+  if (id.length >= 5) {
+    setIdStatus('loading', '機材情報を取得中...');
+    fetchTimer = setTimeout(() => fetchKizai(id), 400);
+  }
+  checkSubmittable();
+});
+
+async function fetchKizai(id) {
+  try {
+    const res = await fetch(`${GAS_URL}?action=getKizai&id=${id}`);
+    const data = await res.json();
+
+    if (data.error) {
+      setIdStatus('error', data.error);
+      resetKizaiPreview();
+      kizaiData = null;
+    } else {
+      kizaiData = data;
+      showKizaiPreview(data);
+      setIdStatus('success', '機材情報を取得しました');
+      fetchLogs(id);
+    }
+  } catch (err) {
+    setIdStatus('error', '通信エラー: GASのURLを確認してください');
+    kizaiData = null;
+  }
+  checkSubmittable();
+}
+
+function setIdStatus(type, msg) {
+  const el = document.getElementById('idStatus');
+  el.className = 'id-status ' + type;
+  el.textContent = msg;
+}
+
+function showKizaiPreview(data) {
+  const preview = document.getElementById('kizaiPreview');
+  document.getElementById('previewName').textContent = data['機材名'] || '（機材名なし）';
+  const kataban = data['型番'] ? `型番: ${data['型番']}　` : '';
+  document.getElementById('previewSub').textContent = `${kataban}現在地: ${data['使用場所'] || '—'}`;
+
+  const jotai = data['状態'] || '不明';
+  const statusEl = document.getElementById('previewStatus');
+  statusEl.textContent = jotai;
+  statusEl.className = 'status-badge ' + getStatusClass(jotai);
+
+  preview.classList.add('visible');
+  preview.classList.add('fade-in');
+}
+
+function resetKizaiPreview() {
+  document.getElementById('kizaiPreview').classList.remove('visible');
+  document.getElementById('logPreview').classList.remove('visible');
+  document.getElementById('idStatus').className = 'id-status';
+  document.getElementById('idStatus').textContent = '';
+  kizaiData = null;
+}
+
+function getStatusClass(jotai) {
+  switch (jotai) {
+    case '在庫中': return 'status-zaiko';
+    case '使用中': return 'status-shiyochu';
+    case '修理中': return 'status-shuri';
+    case '故障中': return 'status-kosho';
+    case '破棄':   return 'status-haki';
+    default:       return 'status-haki';
+  }
+}
+
+// ==========================================
+// 操作ログ取得
+// ==========================================
+async function fetchLogs(id) {
+  try {
+    const res = await fetch(`${GAS_URL}?action=getLogs&id=${id}&limit=3`);
+    const logs = await res.json();
+    if (!Array.isArray(logs) || logs.length === 0) return;
+
+    const container = document.getElementById('logItems');
+    container.innerHTML = '';
+    logs.forEach(log => {
+      const item = document.createElement('div');
+      item.className = 'log-item fade-in';
+
+      const dotColor = getSosaColor(log['操作種別']);
+      const bashoText = log['移動先/持出先'] ? ` → ${log['移動先/持出先']}` : '';
+
+      item.innerHTML = `
+        <div class="log-dot" style="background:${dotColor}"></div>
+        <div class="log-item-body">
+          <div class="log-item-main">${log['操作種別'] || '—'}${bashoText}</div>
+          <div class="log-item-sub">${log['操作日時'] || ''} ・ ${log['入力者'] || ''}</div>
+        </div>`;
+      container.appendChild(item);
+    });
+
+    document.getElementById('logPreview').classList.add('visible');
+  } catch (e) { /* ログ取得失敗は無視 */ }
+}
+
+function getSosaColor(sosa) {
+  switch (sosa) {
+    case '持出': return '#3b82f6';
+    case '返却': return '#22c55e';
+    case '移動': return '#f59e0b';
+    case '修理依頼': return '#a78bfa';
+    case '廃棄': return '#ef4444';
+    default: return '#64748b';
+  }
+}
+
+// ==========================================
+// 操作種別選択
+// ==========================================
+function selectSosa(btn) {
+  selectedSosa = btn.dataset.sosa;
+
+  // 全ボタンのクラスリセット
+  document.querySelectorAll('.sosa-btn').forEach(b => {
+    b.className = 'sosa-btn';
+  });
+
+  // アクティブクラス付与
+  const classMap = {
+    '持出': 'active-mochidashi',
+    '返却': 'active-henkyaku',
+    '移動': 'active-ido',
+    '修理依頼': 'active-shuri',
+    '廃棄': 'active-haki'
+  };
+  btn.classList.add(classMap[selectedSosa] || '');
+
+  // 場所入力の表示制御
+  const loc = document.getElementById('locationSection');
+  const label = document.getElementById('locationLabel');
+  const bashoTo = document.getElementById('bashoTo');
+
+  if (['持出', '移動'].includes(selectedSosa)) {
+    loc.classList.add('visible');
+    label.textContent = selectedSosa === '持出' ? '持出先・使用場所' : '移動先';
+    bashoTo.placeholder = selectedSosa === '持出' ? '例: 福禄台、押熊' : '移動先の場所を入力';
+    document.getElementById('shuriSection').classList.remove('visible');
+  } else if (selectedSosa === '返却') {
+    loc.classList.add('visible');
+    label.textContent = '返却先';
+    bashoTo.value = '置き場';
+    bashoTo.placeholder = '返却先（デフォルト: 置き場）';
+    document.getElementById('shuriSection').classList.remove('visible');
+  } else if (selectedSosa === '修理依頼') {
+    loc.classList.remove('visible');
+    bashoTo.value = '';
+    document.getElementById('shuriSection').classList.add('visible');
+    document.getElementById('shuriSaki').focus();
+  } else {
+    loc.classList.remove('visible');
+    bashoTo.value = '';
+    document.getElementById('shuriSection').classList.remove('visible');
+  }
+
+  checkSubmittable();
+}
+
+// ==========================================
+// 入力者選択
+// ==========================================
+function selectMember(btn, name) {
+  document.querySelectorAll('.person-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedNyuryokusha = name;
+  localStorage.setItem('lastMember', name);
+  // その他入力を隠す
+  document.getElementById('otherInputWrap').classList.remove('visible');
+  document.getElementById('otherName').value = '';
+  checkSubmittable();
+}
+
+function selectOther(btn) {
+  document.querySelectorAll('.person-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedNyuryokusha = null;
+  // その他入力を表示してフォーカス
+  document.getElementById('otherInputWrap').classList.add('visible');
+  document.getElementById('otherName').focus();
+  checkSubmittable();
+}
+
+// ==========================================
+// 送信可否チェック
+// ==========================================
+function checkSubmittable() {
+  const id = document.getElementById('kizaiId').value.trim();
+  const bashoTo = document.getElementById('bashoTo').value.trim();
+  const shuriSaki = document.getElementById('shuriSaki').value.trim();
+  const btn = document.getElementById('submitBtn');
+
+  let ok = id && selectedSosa && selectedNyuryokusha;
+
+  // 持出・移動は場所必須
+  if (['持出', '移動'].includes(selectedSosa) && !bashoTo) ok = false;
+
+  // 修理依頼は修理先必須
+  if (selectedSosa === '修理依頼' && !shuriSaki) ok = false;
+
+  btn.disabled = !ok;
+}
+
+document.getElementById('bashoTo').addEventListener('input', checkSubmittable);
+document.getElementById('shuriSaki').addEventListener('input', checkSubmittable);
+
+// ==========================================
+// 送信
+// ==========================================
+async function submitForm() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+
+  const id = document.getElementById('kizaiId').value.trim();
+  const bashoTo = document.getElementById('bashoTo').value.trim();
+  const shuriSaki = document.getElementById('shuriSaki').value.trim();
+  const bikou = document.getElementById('bikou').value.trim();
+
+  // その他入力者をlocalStorageに記録しない（一時的な使用のため）
+  const nyuryokushaName = selectedNyuryokusha;
+
+  // 修理依頼の場合は修理先を移動先として記録
+  const bashoToFinal = selectedSosa === '修理依頼' ? shuriSaki : bashoTo;
+
+  const payload = {
+    action: 'submitLog',
+    id: id,
+    kizaiName: kizaiData ? kizaiData['機材名'] : '',
+    sosa: selectedSosa,
+    bashoFrom: kizaiData ? kizaiData['使用場所'] : '',
+    bashoTo: bashoToFinal,
+    nyuryokusha: nyuryokushaName,
+    bikou: bikou
+  };
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+
+    if (result.error) {
+      showModal(false, 'エラーが発生しました', result.error);
+    } else {
+      const bashoMsg = bashoTo ? ` → ${bashoTo}` : '';
+      showModal(true, `${selectedSosa}を記録しました`, `ID: ${id} ・ ${selectedNyuryokusha}${bashoMsg}`);
+      resetForm();
+    }
+  } catch (err) {
+    showModal(false, '通信エラー', 'ネットワークを確認してください');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>送信する`;
+}
+
+// ==========================================
+// フォームリセット（入力者は維持）
+// ==========================================
+function resetForm() {
+  document.getElementById('kizaiId').value = '';
+  document.getElementById('bashoTo').value = '';
+  document.getElementById('shuriSaki').value = '';
+  document.getElementById('bikou').value = '';
+  document.getElementById('otherName').value = '';
+  document.getElementById('otherInputWrap').classList.remove('visible');
+  selectedSosa = null;
+  kizaiData = null;
+  document.querySelectorAll('.sosa-btn').forEach(b => b.className = 'sosa-btn');
+  document.getElementById('locationSection').classList.remove('visible');
+  document.getElementById('shuriSection').classList.remove('visible');
+  resetKizaiPreview();
+  checkSubmittable();
+}
+
+// ==========================================
+// モーダル
+// ==========================================
+function showModal(success, title, sub) {
+  const overlay = document.getElementById('successModal');
+  const icon = document.getElementById('modalIcon');
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent = sub;
+
+  if (success) {
+    icon.className = 'modal-icon';
+    icon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--green')}" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  } else {
+    icon.className = 'modal-icon error-icon';
+    icon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--red')}" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  }
+  overlay.classList.add('visible');
+}
+
+function closeModal() {
+  document.getElementById('successModal').classList.remove('visible');
+}
+
+// ==========================================
+// QRスキャナー
+// ==========================================
+let scannerStream = null;
+
+document.getElementById('scanBtn').addEventListener('click', openScannerModal);
+
+async function openScannerModal() {
+  if (!('BarcodeDetector' in window)) {
+    alert('このブラウザはQRスキャンに対応していません。\niOS Safariまたは最新のChromeをご利用ください。');
+    return;
+  }
+
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    const video = document.getElementById('scanner-video');
+    video.srcObject = scannerStream;
+    document.getElementById('scannerModal').classList.add('active');
+    startBarcodeDetection(video);
+  } catch (err) {
+    alert('カメラの使用許可が必要です');
+  }
+}
+
+async function startBarcodeDetection(video) {
+  const detector = new BarcodeDetector({ formats: ['qr_code'] });
+  let scanning = true;
+
+  const detect = async () => {
+    if (!scanning) return;
+    try {
+      const barcodes = await detector.detect(video);
+      if (barcodes.length > 0) {
+        const raw = barcodes[0].rawValue;
+        // QRコードから機材IDを抽出（数字のみ or "ID:10001" 形式に対応）
+        const match = raw.match(/\d{5}/);
+        if (match) {
+          scanning = false;
+          closeScannerModal();
+          document.getElementById('kizaiId').value = match[0];
+          setIdStatus('loading', '機材情報を取得中...');
+          fetchKizai(match[0]);
+        }
+      }
+    } catch (e) { /* 検出失敗は継続 */ }
+    if (scanning) requestAnimationFrame(detect);
+  };
+  requestAnimationFrame(detect);
+}
+
+function closeScannerModal() {
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+  }
+  document.getElementById('scannerModal').classList.remove('active');
+}
+</script>
+</body>
+</html>
