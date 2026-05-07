@@ -293,7 +293,7 @@ select.fi{cursor:pointer;}
       <button class="btn btn-primary" onclick="openMP()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>担当者追加</button>
     </div>
     <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="member-count"></div>
-    <div class="tw"><table><thead><tr><th>No.</th><th>氏名</th><th>所属</th><th>表示順</th><th>登録日</th><th>操作回数</th></tr></thead><tbody id="m-tbody"><tr class="loading-row"><td colspan="6">読み込み中...</td></tr></tbody></table></div>
+    <div class="tw"><table><thead><tr><th>No.</th><th>氏名</th><th>表示順</th><th>登録日</th><th>操作回数</th></tr></thead><tbody id="m-tbody"><tr class="loading-row"><td colspan="6">読み込み中...</td></tr></tbody></table></div>
   </div>
 
   <!-- 操作ログ -->
@@ -355,17 +355,6 @@ select.fi{cursor:pointer;}
     <div class="pb">
       <input type="hidden" id="mp-id">
       <div class="fg"><div class="fl">氏名 <span class="req">必須</span></div><input class="fi" id="mp-name" placeholder="例: 田仲克弥" oninput="ckM()"></div>
-      <div class="fg">
-        <div class="fl">所属</div>
-        <select class="fi" id="mp-group">
-          <option value="">選択してください</option>
-          <option value="ネクサス">株式会社ネクサス</option>
-          <option value="フォレスト総建">フォレスト総建株式会社</option>
-          <option value="伊賀林業">株式会社伊賀林業</option>
-          <option value="ルプラス">株式会社ルプラス</option>
-          <option value="その他">その他</option>
-        </select>
-      </div>
       <div class="fg"><div class="fl">表示順</div><input class="fi" type="number" id="mp-order" placeholder="数字が小さいほど上に表示" min="1"><div class="fhint">入力フォームでの並び順。空白の場合は末尾に追加されます。</div></div>
     </div>
     <div class="pf">
@@ -483,8 +472,8 @@ function filterK(){const q=document.getElementById('ks').value.toLowerCase(),jt=
 function renderMT(data) {
   document.getElementById('member-count').textContent=`${data.length} 名登録`;
   const mc={};allLogs.forEach(l=>{if(l['入力者'])mc[l['入力者']]=(mc[l['入力者']]||0)+1;});
-  document.getElementById('m-tbody').innerHTML=data.length===0?'<tr class="empty-row"><td colspan="6">担当者が登録されていません</td></tr>':
-    data.map((m,i)=>`<tr onclick='editM(${JSON.stringify(m).replace(/'/g,"&#39;")})'><td class="td-sub">${i+1}</td><td style="font-weight:500">${esc(m['氏名']||'—')}</td><td class="td-sub">${esc(m['所属']||'—')}</td><td class="td-sub">${m['表示順']||'—'}</td><td class="td-sub">${esc(m['登録日']||'—')}</td><td><span style="font-weight:600">${mc[m['氏名']]||0}</span> <span class="td-sub">回</span></td></tr>`).join('');
+  document.getElementById('m-tbody').innerHTML=data.length===0?'<tr class="empty-row"><td colspan="5">担当者が登録されていません</td></tr>':
+    data.map((m,i)=>`<tr onclick='editM(${JSON.stringify(m).replace(/'/g,"&#39;")})'><td class="td-sub">${i+1}</td><td style="font-weight:500">${esc(m['氏名']||'—')}</td><td class="td-sub">${m['表示順']||'—'}</td><td class="td-sub">${esc(m['登録日']||'—')}</td><td><span style="font-weight:600">${mc[m['氏名']]||0}</span> <span class="td-sub">回</span></td></tr>`).join('');
 }
 function filterM(){const q=document.getElementById('ms').value.toLowerCase();renderMT(allMembers.filter(m=>!q||(m['氏名']||'').toLowerCase().includes(q)||(m['所属']||'').toLowerCase().includes(q)));}
 
@@ -554,10 +543,9 @@ function openMP(){
 function editM(m){
   editMId=m['ID']||m['氏名'];
   document.getElementById('mp-title').textContent=m['氏名'];
-  document.getElementById('mp-idlbl').textContent=m['所属']||'';
+  document.getElementById('mp-idlbl').textContent='';
   document.getElementById('mp-id').value=m['ID']||'';
   document.getElementById('mp-name').value=m['氏名']||'';
-  document.getElementById('mp-group').value=m['所属']||'';
   document.getElementById('mp-order').value=m['表示順']||'';
   document.getElementById('mp-del').style.display='inline-flex';
   document.getElementById('mp-submit').textContent='保存する';
@@ -567,7 +555,7 @@ function ckM(){document.getElementById('mp-submit').disabled=!document.getElemen
 async function submitM(){
   const btn=document.getElementById('mp-submit'); btn.disabled=true; btn.textContent='処理中...';
   const isE=!!document.getElementById('mp-id').value;
-  const p={action:isE?'updateMember':'addMember',id:document.getElementById('mp-id').value,name:document.getElementById('mp-name').value.trim(),group:document.getElementById('mp-group').value,order:document.getElementById('mp-order').value||''};
+  const p={action:isE?'updateMember':'addMember',id:document.getElementById('mp-id').value,name:document.getElementById('mp-name').value.trim(),order:document.getElementById('mp-order').value||''};
   try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(p)});const res=await r.json();if(res.error)toast2(false,res.error);else{toast2(true,res.message||(isE?'更新しました':'追加しました'));closeP('mp-ov');await loadM();}}catch{toast2(false,'通信エラー');}
   btn.disabled=false; btn.textContent=isE?'保存する':'追加する'; ckM();
 }
